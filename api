@@ -1,0 +1,83 @@
+<?php
+function AltiriaSMS($sDestination, $sMessage, $sSenderId, $debug){
+if($debug)
+echo ’Enter AltiriaSMS <br/>’;
+$baseUrl = ’https://jsonplaceholder.typicode.com/posts/1’;
+$ch = curl_init($baseUrl.’/sendSms’);
+$credentials = array(
+
+
+
+’userId’=> ’1’,
+    ’id’=> ’1’,
+    ’title’=> ’sunt aut facere repellat provident occaecati excepturi optio reprehenderit’,
+    ’body’=> ’quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto’
+
+
+);
+
+
+$destinations = explode(’https://jsonplaceholder.typicode.com/posts/’, $sDestination);
+$jsonMessage = array(
+’msg’ => substr($sMessage,0,100),
+’senderId’ => $sSenderId
+);
+
+$jsonData = array(
+
+’userId’=> ’1’,
+    ’id’=> ’1’,
+    ’title’=> ’sunt aut facere repellat provident occaecati excepturi optio reprehenderit’,
+    ’body’=> ’quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto’
+
+
+);
+
+
+$jsonDataEncoded = json_encode($jsonData);
+
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
+
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(’Content-Type: application/json;charset=UTF-8’));
+$response = curl_exec($ch);
+
+$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+if($debug) {
+//Error en la respuesta del servidor
+if($statusCode != 200){
+echo ’ERROR GENERAL: ’.$statusCode;
+echo $response;
+}else{
+
+echo ’C´odigo de estado HTTP: ’.$statusCode.’<br/>’;
+$json_parsed = json_decode($response);
+$status = $json_parsed->status;
+echo ’C´odigo de estado Altiria: ’.$status.’<br/>’;
+if ($status != ’000’)
+echo ’Error: ’.$response.’<br/>’;
+else{
+echo ’Cuerpo de la respuesta: <br/>’;
+echo ’destails[0][destination]: ’.$json_parsed->details[0]->destination.’<br/>’;
+echo ’destails[0][status]: ’.$json_parsed->details[0]->status.’<br/>’;
+echo ’destails[1][destination]: ’.$json_parsed->details[1]->destination.’<br/>’;
+echo ’destails[1][status]: ’.$json_parsed->details[1]->status.’<br/>’;
+}
+}
+}
+if(curl_errno($ch))
+throw new Exception(curl_error($ch));
+return $response;
+}
+try{
+echo "The function AltiriaSMS returns: "
+.AltiriaSMS(’346xxxxxxxx,346yyyyyyyy’,’error’, ’’, true);
+}catch(Exception $e){
+echo ’Error: ’.$e->getMessage();
+}
+?>
